@@ -44,13 +44,12 @@ export default function DicomUploader({
   const { t } = useTranslation();
 
   useEffect(() => {
-    new Promise<null>(async (_res, _rej) => {
       if (isUploading == false) {
         const studyUid = files.find(
           (f) => f?.study_uid && f?.study_uid != ""
         )?.study_uid;
         if (!studyUid) return;
-        const link = `view/${studyUid}`;
+        const link = `/radiology/view/${studyUid}`;
         if (link) {
           setSuccessfulLink(link);
           toast.success(
@@ -63,8 +62,7 @@ export default function DicomUploader({
           );
         }
       }
-    });
-  }, [isUploading]);
+  }, [isUploading, files]);
 
   const handleFolderSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = event.target.files;
@@ -136,7 +134,6 @@ export default function DicomUploader({
 
     if (counts.failed) {
       toast.error(`${counts.failed} files failed. ${counts.success} uploaded.`);
-    } else {
     }
 
     setIsUploading(false);
