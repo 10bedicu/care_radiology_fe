@@ -1,0 +1,9 @@
+{
+  "dicom": "Dicom",
+  "dicom_uploader": "DICOM Uploader",
+  "dicom_viewer": "DICOM Viewer",
+  "dicom_upload_data": "Add DICOM Images",
+  "dicom_search_records": "Search Radiology Records",
+  "dicom_upload_prompt": "Click 'Folder' or 'Files' to upload your DICOM files.",
+  "dicom_no_studies_found": "No studies found"
+}
