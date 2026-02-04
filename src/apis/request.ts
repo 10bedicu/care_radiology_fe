@@ -1,5 +1,4 @@
-import { CARE_ACCESS_TOKEN_LOCAL_STORAGE_KEY, PLUGIN_SLUG } from "@/constants";
-import { PlugConfigMeta } from "@/types/plugin";
+import { CARE_ACCESS_TOKEN_LOCAL_STORAGE_KEY } from "@/constants";
 
 export class APIError extends Error {
   message: string;
@@ -20,8 +19,7 @@ export async function request<Response>(
   options?: RequestInit,
   additionalOptions: { isFormdata: boolean } = { isFormdata: false }
 ): Promise<Response> {
-  const meta = window.__CARE_PLUGIN_RUNTIME__?.meta[PLUGIN_SLUG] as PlugConfigMeta;
-  const url = `${ meta?.config?.radiologyViewerBaseUrl || "" }`;
+  const url = `${(window as any).__CORE_ENV__?.apiUrl || ""}${path}`;
 
   const defaultHeaders: any = {
     Authorization: `Bearer ${localStorage.getItem(
