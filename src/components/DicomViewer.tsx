@@ -3,6 +3,8 @@ import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
+import { PLUGIN_SLUG } from "@/constants";
+import { PlugConfigMeta } from "@/types/plugin";
 
 export default function DicomViewer({
   studyUid,
@@ -23,9 +25,9 @@ export default function DicomViewer({
       .ensureQueryData({ queryKey: ["user-refresh-token"] })
       .then((val) => {
         const token = (val as { access: string; refresh: string }).access;
-        const ohifBaseUrl = `${
-          (window as any).__CORE_ENV__?.radiologyViewerBaseUrl || ""
-        }`;
+
+        const meta = window.__CARE_PLUGIN_RUNTIME__?.meta[PLUGIN_SLUG] as PlugConfigMeta;
+        const ohifBaseUrl = `${ meta?.config?.radiologyViewerBaseUrl || "" }`;
         if (studyUid && seriesUid && instanceUid) {
           setIframeUrl(
             `${ohifBaseUrl}/viewer?StudyInstanceUIDs=${studyUid}&initialSeriesInstanceUID=${seriesUid}&initialSopInstanceUID=${instanceUid}&token=${token}`
