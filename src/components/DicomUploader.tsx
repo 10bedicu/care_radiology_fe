@@ -15,6 +15,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
 import { apis } from "@/apis";
 import { Toaster } from "sonner";
 import { toast } from "@/lib/utils";
+import { PLUGIN_SLUG } from "@/constants";
 
 type FileStatus = "pending" | "uploading" | "success" | "failed";
 
@@ -41,7 +42,8 @@ export default function DicomUploader({
 
   const goBack = () => window.history.back();
 
-  const { t } = useTranslation();
+  const { t } = useTranslation(PLUGIN_SLUG);
+  const { t: baseTranslate } = useTranslation();
 
   useEffect(() => {
       if (isUploading == false) {
@@ -213,7 +215,7 @@ export default function DicomUploader({
             <div className="flex flex-col items-center justify-center py-20 text-center text-gray-500">
               <FolderPlus className="h-16 w-16 text-gray-300 mb-4" />
               <h3 className="text-lg font-medium mb-2">
-                {t("no_files_attached")}
+                {baseTranslate("no_files_attached")}
               </h3>
               <p className="text-sm max-w-sm text-gray-400">
                 {t("dicom_upload_prompt")}
@@ -224,19 +226,16 @@ export default function DicomUploader({
               <div className="mb-4 p-3 rounded-md bg-gray-50 border border-gray-100 text-sm text-gray-700 font-bold">
                 {uploadedCount > 0 && (
                   <span className="text-green-600">
-                    {/* eslint-disable-next-line i18next/no-literal-string */}
                     {uploadedCount} uploaded.{" "}
                   </span>
                 )}
                 {failedCount > 0 && (
                   <span className="text-red-500">
-                    {/* eslint-disable-next-line i18next/no-literal-string */}
                     {failedCount} failed.{" "}
                   </span>
                 )}
                 {pendingCount > 0 && !isUploading && (
                   <span className="text-gray-500">
-                    {/* eslint-disable-next-line i18next/no-literal-string */}
                     {files.length} ready for upload.
                   </span>
                 )}
@@ -276,7 +275,7 @@ export default function DicomUploader({
               variant="outline"
               className="min-w-[100px]"
             >
-              {t("cancel")}
+              {baseTranslate("cancel")}
             </Button>
             {successfulLink && !isUploading && (
               <Button
@@ -296,7 +295,7 @@ export default function DicomUploader({
               size="sm"
               className="min-w-[100px]"
             >
-              {isUploading ? "Uploading..." : t("upload")}
+              {isUploading ? "Uploading..." : baseTranslate("upload")}
             </Button>
           </div>
         </CardContent>

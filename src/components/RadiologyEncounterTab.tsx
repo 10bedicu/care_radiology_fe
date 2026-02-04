@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useState } from "react";
 import { EncounterTabProps } from "../types/EncouterTab";
 import { useTranslation } from "react-i18next";
 import { Button } from "./ui/button";
@@ -10,12 +10,13 @@ import { apis } from "@/apis";
 import { Card, CardContent } from "./ui/card";
 import RadiologyStudyTable from "./RadiologyStudyTable";
 import { DicomStudy } from "@/types/Dicom";
+import { PLUGIN_SLUG } from "@/constants";
 
 export const RadiologyEncounterTab: FC<EncounterTabProps> = ({
   patient,
   encounter,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(PLUGIN_SLUG);
   const [searchInput, setSearchInput] = useState("");
   const {
     data: dicomStudies,

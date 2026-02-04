@@ -17,7 +17,7 @@ export default function DicomViewer({
 }) {
   const dicomViewerRef = useRef<HTMLIFrameElement>(null);
   const [iframeUrl, setIframeUrl] = useState<string | null>(null);
-  const { t } = useTranslation();
+  const { t } = useTranslation(PLUGIN_SLUG);
 
   const queryClient = useQueryClient();
   useEffect(() => {

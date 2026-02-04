@@ -4,7 +4,7 @@ import { DicomStudy } from "@/types/Dicom";
 import { apis } from "@/apis";
 import React from "react";
 import RadiologyStudyTable from "./RadiologyStudyTable";
-import { Card, CardContent, CardHeader } from "./ui/card";
+import { Card, CardContent } from "./ui/card";
 import { Label } from "@radix-ui/react-label";
 
 type SRProps = {
