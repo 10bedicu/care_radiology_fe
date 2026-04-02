@@ -226,16 +226,19 @@ export default function DicomUploader({
               <div className="mb-4 p-3 rounded-md bg-gray-50 border border-gray-100 text-sm text-gray-700 font-bold">
                 {uploadedCount > 0 && (
                   <span className="text-green-600">
+                    {/* eslint-disable-next-line i18next/no-literal-string */}
                     {uploadedCount} uploaded.{" "}
                   </span>
                 )}
                 {failedCount > 0 && (
                   <span className="text-red-500">
+                    {/* eslint-disable-next-line i18next/no-literal-string */}
                     {failedCount} failed.{" "}
                   </span>
                 )}
                 {pendingCount > 0 && !isUploading && (
                   <span className="text-gray-500">
+                    {/* eslint-disable-next-line i18next/no-literal-string */}
                     {files.length} ready for upload.
                   </span>
                 )}
