@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "./ui/table";
 import { navigate } from "raviger";
-import { Eye, Info, X } from "lucide-react";
+import { Eye, FileText, Info, X, Pencil } from "lucide-react";
 import { format } from "date-fns";
 import React from "react";
 
@@ -57,6 +57,20 @@ export const RadiologyStudyTable: FC<RadiologyStudyTableProps> = (props) => {
                 </TableCell>
                 <TableCell>
                   <div className="flex gap-3 items-center justify-end">
+                    {study.has_report && 
+                      <button
+                            onClick={() =>
+                              window.open(
+                                `/radiology/report/${study.external_id}/preview`,
+                                "_blank"
+                              )
+                            }
+                            className="text-gray-600 hover:text-orange-600"
+                            title="View Report"
+                      >
+                            <FileText size={18} />
+                      </button>
+                    }             
                     <button
                       onClick={() =>
                         navigate(`/radiology/view/${study.study_uid}`)
@@ -72,6 +86,15 @@ export const RadiologyStudyTable: FC<RadiologyStudyTableProps> = (props) => {
                       title="Study Info"
                     >
                       <Info size={18} />
+                    </button>
+                    <button
+                          onClick={() =>
+                            navigate(`/radiology/report/${study.external_id}`)
+                          }
+                          className="text-gray-600 hover:text-purple-600"
+                          title="Edit Report"
+                    >
+                          <Pencil size={18} />
                     </button>
                   </div>
                 </TableCell>

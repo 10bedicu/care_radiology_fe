@@ -1,9 +1,11 @@
 export interface DicomStudy {
+  external_id: string;
   study_uid: string;
   study_date: string;
   study_description: string;
   study_modalities: string[];
   study_series: DicomSeries[];
+  has_report: boolean;
 }
 
 export interface DicomSeries {
