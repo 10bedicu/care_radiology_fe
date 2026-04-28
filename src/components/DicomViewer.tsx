@@ -27,7 +27,7 @@ export default function DicomViewer({
         const token = (val as { access: string; refresh: string }).access;
 
         const meta = window.__CARE_PLUGIN_RUNTIME__?.meta[PLUGIN_SLUG] as PlugConfigMeta;
-        const ohifBaseUrl = `${ meta?.config?.radiologyViewerBaseUrl || "" }`;
+        const ohifBaseUrl = `${ meta?.radiologyViewerBaseUrl || "" }`;
         if (studyUid && seriesUid && instanceUid) {
           setIframeUrl(
             `${ohifBaseUrl}/viewer?StudyInstanceUIDs=${studyUid}&initialSeriesInstanceUID=${seriesUid}&initialSopInstanceUID=${instanceUid}&token=${token}`
