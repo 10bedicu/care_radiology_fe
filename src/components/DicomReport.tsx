@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { apis } from "@/apis";
 import { Button } from "./ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Card, CardContent } from "./ui/card";
 import { Input } from "./ui/input";
 import Quill from "quill";
 import Editor from "./ui/quilleditor";
@@ -10,6 +10,7 @@ import EditAddModal from "./EditAddModal";
 import { toast, Toaster } from "sonner";
 import { useTranslation } from "react-i18next";
 import RadiologyAuditPopup from "./Common/RadiologyAuditPopup";
+import PatientDetails from "./Common/PatientDetails";
 import { APIError } from "@/apis/request";
 
 export default function DicomReport({
@@ -342,41 +343,57 @@ export default function DicomReport({
   };
 
   return (
-    <Card
-      data-study-uid={studyUid}
-      className="shadow-sm border bg-white w-full h-full"
-    >
-      <CardHeader className="flex flex-row items-center justify-between pb-3">
-        <CardTitle className="text-xl font-semibold text-gray-800">
-          {t("radiology_dicom_report")}
-        </CardTitle>
-        <Info
-          size={20}
-          className="cursor-pointer text-gray-600 hover:text-blue-600"
-          onClick={() => setShowAuditPopup(true)}
-        />
-      </CardHeader>
+    <div className="w-full h-full flex flex-col">
+      {/* Page Header */}
+      <div className="flex items-center justify-between px-6 py-4 bg-white border-b">
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-900">
+            {t("radiology_dicom_report")}
+          </h1>
+          <p className="text-sm text-gray-600 mt-1">
+            Reporting on study <span className="font-medium">ACC-2026-005821</span> · Patient{" "}
+            <span className="font-medium">R. Iyer (M, 47)</span>
+          </p>
+        </div>
+        <div className="flex items-center gap-4">
+          <span className="flex items-center gap-2 text-sm text-gray-500">
+            
+          </span>
+          <Info
+              size={18}
+              className="cursor-pointer text-gray-400 hover:text-green-600 ml-2"
+              onClick={() => setShowAuditPopup(true)}
+            />
+        </div>
+      </div>
 
-      <CardContent className="w-full">
-        <div className="flex flex-row gap-4 w-full h-[80vh]">
+      {/* <Card
+        data-study-uid={studyUid}
+        className="shadow-sm border-0 border-t bg-white w-full flex-1 rounded-none"
+      > */}
+
+      {/* <CardContent className="w-full px-6 pt-0 pb-6"> */}
+        {/* Patient Details Card */}
+        <PatientDetails />
+
+        <div className="flex flex-row gap-4 w-full h-[80vh] overflow-hidden">
           {/* Left Sidebar */}
-          <div className="w-1/4 min-w-[250px] border rounded-lg p-3 bg-gray-50 flex flex-col justify-between">
-            <div>
-              {/* Modality Section */}
-              <div className="mb-4">
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-medium text-sm text-gray-700">
-                    {t("radiology_modality_type")}
+          <div className="w-[360px] min-w-[360px] max-w-[360px] border rounded-lg p-4 bg-gray-50 flex flex-col gap-4 overflow-y-auto shrink-0 overflow-x-hidden">
+            {/* Modality Section */}
+            <div className="w-full min-w-0">
+                <div className="flex justify-between items-center mb-2 gap-2">
+                  <h4 className="font-medium text-sm text-gray-700 truncate flex-1">
+                    {t("radiology_modality_type")} <span className="text-red-500">*</span>
                   </h4>
-                  <div className="flex gap-1">
+                  <div className="flex gap-1 shrink-0">
                     <Plus
                       size={16}
-                      className="cursor-pointer"
+                      className="cursor-pointer hover:text-green-600"
                       onClick={() => handleAdd("modality")}
                     />
                     <Pencil
                       size={16}
-                      className="cursor-pointer"
+                      className="cursor-pointer hover:text-green-600"
                       onClick={() => handleEdit("modality")}
                     />
                   </div>
@@ -397,9 +414,9 @@ export default function DicomReport({
                       setBodyParts([]);
                       setScanProtocols([]);
                       setInitialLoaded(false);
-                    
+
                     }}
-                    className="w-full border rounded-md text-sm p-2"
+                    className="w-full max-w-full border border-gray-300 rounded-md text-sm p-2.5 bg-white focus:border-green-500 focus:ring-1 focus:ring-green-500"
                   >
                     <option value="">{t("radiology_select_modality")}</option>
                     {modalities.map((mod) => (
@@ -412,20 +429,20 @@ export default function DicomReport({
               </div>
 
               {/* Body Part Section */}
-              <div className="mb-4">
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-medium text-sm text-gray-700">
-                    {t("radiology_body_part")}
+              <div className="w-full min-w-0">
+                <div className="flex justify-between items-center mb-2 gap-2">
+                  <h4 className="font-medium text-sm text-gray-700 truncate flex-1">
+                    {t("radiology_body_part")} <span className="text-red-500">*</span>
                   </h4>
-                  <div className="flex gap-1">
+                  <div className="flex gap-1 shrink-0">
                     <Plus
                       size={16}
-                      className="cursor-pointer"
+                      className="cursor-pointer hover:text-green-600"
                       onClick={() => handleAdd("bodypart")}
                     />
                     <Pencil
                       size={16}
-                      className="cursor-pointer"
+                      className="cursor-pointer hover:text-green-600"
                       onClick={() => handleEdit("bodypart")}
                     />
                   </div>
@@ -435,46 +452,41 @@ export default function DicomReport({
                     {t("radiology_loading")}
                   </div>
                 ) : (
-                  <div className="min-h-[200px] max-h-[250px] overflow-y-auto border rounded-md p-2 bg-white text-sm">
+                  <select
+                    value={selectedBodyPart}
+                    onChange={(e) => {
+                      setSelectedBodyPart(e.target.value);
+                      setSelectedScanProtocol("");
+                      setScanProtocols([]);
+                      setInitialLoaded(false);
+                    }}
+                    className="w-full max-w-full border border-gray-300 rounded-md text-sm p-2.5 bg-white focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                  >
+                    <option value="">{t("radiology_select")} Body Part</option>
                     {bodyParts.map((bp) => (
-                      <div
-                        key={bp.external_id}
-                        onClick={() => {
-                          setSelectedBodyPart(bp.external_id);
-                          // reset dependent
-                          setSelectedScanProtocol("");
-                          setScanProtocols([]);
-                          setInitialLoaded(false);
-                          
-                        }}
-                        className={`p-1 rounded-md cursor-pointer mb-1 hover:bg-blue-100 ${
-                          selectedBodyPart === bp.external_id
-                            ? "bg-blue-200"
-                            : ""
-                        }`}
-                      >
+                      <option key={bp.external_id} value={bp.external_id}>
                         {bp.display_name}
-                      </div>
+                      </option>
                     ))}
-                  </div>
+                  </select>
                 )}
               </div>
 
               {/* Scan Protocol Section */}
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-medium text-sm text-gray-700">
+              <div className="w-full min-w-0">
+                <div className="flex justify-between items-center mb-2 gap-2">
+                  <h4 className="font-medium text-sm text-gray-700 truncate flex-1">
                     {t("radiology_scan_protocol")}
                   </h4>
-                  <div className="flex gap-1">
+                  <div className="flex gap-1 shrink-0">
                     <Plus
                       size={16}
-                      className="cursor-pointer"
+                      className="cursor-pointer hover:text-green-600"
                       onClick={() => handleAdd("scanprotocol")}
                     />
                     <Pencil
                       size={16}
-                      className="cursor-pointer"
+                      className="cursor-pointer hover:text-green-600"
                       onClick={() => handleEdit("scanprotocol")}
                     />
                   </div>
@@ -484,34 +496,33 @@ export default function DicomReport({
                     {t("radiology_loading")}
                   </div>
                 ) : (
-                  <div className="min-h-[200px] max-h-[250px] overflow-y-auto border rounded-md p-2 bg-white text-sm">
+                  <select
+                    value={selectedScanProtocol}
+                    onChange={(e) => setSelectedScanProtocol(e.target.value)}
+                    className="w-full max-w-full border border-gray-300 rounded-md text-sm p-2.5 bg-white focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                  >
+                    <option value="">{t("radiology_select")} Scan Protocol</option>
                     {scanProtocols.map((sp) => (
-                      <div
-                        key={sp.external_id}
-                        onClick={() => setSelectedScanProtocol(sp.external_id)}
-                        className={`p-1 rounded-md cursor-pointer mb-1 hover:bg-blue-100 ${
-                          selectedScanProtocol === sp.external_id
-                            ? "bg-blue-200"
-                            : ""
-                        }`}
-                      >
+                      <option key={sp.external_id} value={sp.external_id}>
                         {sp.display_name}
-                      </div>
+                      </option>
                     ))}
-                  </div>
+                  </select>
                 )}
               </div>
-            </div>
           </div>
 
           {/* Report Section */}
           <div className="flex-1 border rounded-lg p-4 bg-gray-50 overflow-y-auto">
             <div className="flex flex-col gap-4 h-full">
-              {/* Scan Name display */}
+              {/* Scan Protocol Summary */}
               <div>
-                <label className="font-medium text-gray-700 text-sm">
-                  {t("radiology_scan_protocol")}
-                </label>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="font-medium text-gray-700 text-sm">
+                    {t("radiology_scan_protocol")} Summary
+                  </label>
+                  <span className="text-xs text-gray-500">Auto-derived from left panel</span>
+                </div>
                 <Input
                   value={
                     scanProtocols.find(
@@ -519,7 +530,7 @@ export default function DicomReport({
                     )?.display_name || ""
                   }
                   readOnly
-                  className="bg-gray-100 mt-1"
+                  className="bg-gray-100 border-gray-200"
                 />
               </div>
 
@@ -529,27 +540,30 @@ export default function DicomReport({
                   {t("radiology_technique")}
                 </label>
                 <div className="border rounded-md bg-white mt-1">
-                  <Editor ref={techniqueRef} height={105} />
+                  <Editor ref={techniqueRef} height={130} />
                 </div>
               </div>
 
               {/* Findings */}
               <div>
-                <label className="font-medium text-gray-700 text-sm">
-                  {t("radiology_findings")}
-                </label>
-                <div className="border rounded-md bg-white mt-1">
-                  <Editor ref={findingsRef} height={105} />
+                <div className="flex justify-between items-center mb-1">
+                  <label className="font-medium text-gray-700 text-sm">
+                    {t("radiology_findings")} <span className="text-red-500">*</span>
+                  </label>
+
+                </div>
+                <div className="border rounded-md bg-white">
+                  <Editor ref={findingsRef} height={180} />
                 </div>
               </div>
 
               {/* Impression */}
               <div>
                 <label className="font-medium text-gray-700 text-sm">
-                  {t("radiology_impression")}
+                  {t("radiology_impression")} <span className="text-red-500">*</span>
                 </label>
                 <div className="border rounded-md bg-white mt-1">
-                  <Editor ref={impressionRef} height={105} />
+                  <Editor ref={impressionRef} height={130} />
                 </div>
               </div>
 
@@ -577,7 +591,7 @@ export default function DicomReport({
             </div>
           </div>
         </div>
-      </CardContent>
+      {/* </CardContent> */}
 
       {showTemplatePrompt && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
@@ -730,6 +744,7 @@ export default function DicomReport({
         audits={auditLogs}
       />
       <Toaster position="top-center" richColors closeButton />
-    </Card>
+    {/* </Card> */}
+    </div>
   );
 }
