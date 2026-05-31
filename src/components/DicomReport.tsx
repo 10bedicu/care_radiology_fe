@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { apis } from "@/apis";
 import { Button } from "./ui/button";
-import { Card, CardContent } from "./ui/card";
+import { Card } from "./ui/card";
 import { Input } from "./ui/input";
 import Quill from "quill";
 import Editor from "./ui/quilleditor";
@@ -367,18 +367,16 @@ export default function DicomReport({
         </div>
       </div>
 
-      {/* <Card
-        data-study-uid={studyUid}
-        className="shadow-sm border-0 border-t bg-white w-full flex-1 rounded-none"
-      > */}
-
-      {/* <CardContent className="w-full px-6 pt-0 pb-6"> */}
-        {/* Patient Details Card */}
+      {/* Patient Details Card */}
+      <div >
         <PatientDetails />
+      </div>
 
-        <div className="flex flex-row gap-4 w-full h-[80vh] overflow-hidden">
+      {/* Main Report Card */}
+      <Card className="w-full border shadow-sm bg-white mx-6 mb-6">
+        <div className="flex flex-row gap-0 w-full h-[80vh] overflow-hidden">
           {/* Left Sidebar */}
-          <div className="w-[360px] min-w-[360px] max-w-[360px] border rounded-lg p-4 bg-gray-50 flex flex-col gap-4 overflow-y-auto shrink-0 overflow-x-hidden">
+          <div className="w-[360px] min-w-[360px] max-w-[360px] border-r p-6 bg-white flex flex-col gap-4 overflow-y-auto shrink-0 overflow-x-hidden">
             {/* Modality Section */}
             <div className="w-full min-w-0">
                 <div className="flex justify-between items-center mb-2 gap-2">
@@ -513,7 +511,7 @@ export default function DicomReport({
           </div>
 
           {/* Report Section */}
-          <div className="flex-1 border rounded-lg p-4 bg-gray-50 overflow-y-auto">
+          <div className="flex-1 p-6 bg-white overflow-y-auto">
             <div className="flex flex-col gap-4 h-full">
               {/* Scan Protocol Summary */}
               <div>
@@ -591,7 +589,7 @@ export default function DicomReport({
             </div>
           </div>
         </div>
-      {/* </CardContent> */}
+      </Card>
 
       {showTemplatePrompt && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
@@ -744,7 +742,6 @@ export default function DicomReport({
         audits={auditLogs}
       />
       <Toaster position="top-center" richColors closeButton />
-    {/* </Card> */}
     </div>
   );
 }
