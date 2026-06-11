@@ -291,7 +291,7 @@ export default function DicomReport({
   const handlePreview = () => {
       
     window.open(
-      `/radiology/report/${studyUid}/preview`,
+      `radiology/report/${studyUid}/preview`,
       "_blank",
     );
   };

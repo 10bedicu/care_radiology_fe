@@ -61,7 +61,7 @@ export const RadiologyStudyTable: FC<RadiologyStudyTableProps> = (props) => {
                       <button
                             onClick={() =>
                               window.open(
-                                `/radiology/report/${study.external_id}/preview`,
+                                `radiology/report/${study.external_id}/preview`,
                                 "_blank"
                               )
                             }
@@ -73,7 +73,7 @@ export const RadiologyStudyTable: FC<RadiologyStudyTableProps> = (props) => {
                     }             
                     <button
                       onClick={() =>
-                        navigate(`/radiology/view/${study.study_uid}`)
+                        navigate(`radiology/view/${study.study_uid}`)
                       }
                       className="text-gray-600 hover:text-blue-600"
                       title="View Study"
@@ -89,7 +89,7 @@ export const RadiologyStudyTable: FC<RadiologyStudyTableProps> = (props) => {
                     </button>
                     <button
                           onClick={() =>
-                            navigate(`/radiology/report/${study.external_id}`)
+                            navigate(`radiology/report/${study.external_id}`)
                           }
                           className="text-gray-600 hover:text-purple-600"
                           title="Edit Report"
