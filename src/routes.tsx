@@ -4,33 +4,50 @@ import DicomReport from "./components/DicomReport";
 import StudyReportPreview from "./components/Study/StudyReportPreview";
 
 const routes = {
-  "/facility/:facilityid/patient/:patientid/encounter/:encounterid/radiology/uploader":
+  "/facility/:facilityId/patient/:patientId/service_requests/:serviceRequestId/radiology/uploader":
     ({
-      patientid,
-      encounterid,
+      facilityId,
+      patientId,
+      serviceRequestId
     }: {
-      facilityid: string;
-      patientid: string;
-      encounterid: string;
+      facilityId: string;
+      patientId: string;
+      serviceRequestId: string;
     }) => (
       <DicomUploader
-        patientId={patientid}
-        encounterId={encounterid}
+        facilityId={facilityId}
+        patientId={patientId}
+        serviceRequestId={serviceRequestId}
       ></DicomUploader>
     ),
-  "/facility/:facilityid/patient/:patientid/encounter/:encounterid/radiology/view/:studyid":
+  "/facility/:facilityId/patient/:patientId/service_requests/:serviceRequestId/radiology/view/:studyid":
     ({ studyid }: { studyid: string }) => (
       <DicomViewer studyUid={studyid}></DicomViewer>
     ),
-  "/facility/:facilityid/patient/:patientid/encounter/:encounterid/radiology/report/:studyid":
-    ({ studyid }: { studyid: string }) => (
-      <DicomReport studyUid={studyid}></DicomReport>
+  "/facility/:facilityId/patient/:patientId/service_requests/:serviceRequestId/radiology/report/:studyid":
+    ({ 
+      facilityId, 
+      patientId, 
+      serviceRequestId, 
+      studyid 
+    }: { 
+      facilityId: string;
+      patientId: string;
+      serviceRequestId: string;
+      studyid: string;
+    }) => (
+      <DicomReport 
+        facilityId={facilityId} 
+        patientId={patientId}
+        serviceRequestId={serviceRequestId}
+        studyUid={studyid}
+      ></DicomReport>
     ),
-  "/facility/:facilityid/patient/:patientid/encounter/:encounterid/radiology/report/:studyid/preview":
+  "/facility/:facilityId/patient/:patientId/service_requests/:serviceRequestId/radiology/report/:studyid/preview":
     ({ studyid }: { studyid: string }) => (
       <StudyReportPreview studyUid={studyid}></StudyReportPreview>
     ),
-  /* "/facility/:facilityid/services_requests/radiology/view/:studyid": (
+  /* "/facility/:facilityId/services_requests/radiology/view/:studyid": (
       { studyid }: { studyid: string }
     ) => (
       <DicomViewer studyUid={studyid}></DicomViewer>

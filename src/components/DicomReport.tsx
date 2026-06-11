@@ -14,8 +14,14 @@ import PatientDetails from "./Common/PatientDetails";
 import { APIError } from "@/apis/request";
 
 export default function DicomReport({
+  facilityId,
+  patientId,
+  serviceRequestId,
   studyUid
 }: {
+  facilityId: string;
+  patientId: string;
+  serviceRequestId: string;
   studyUid: string;
 }) {
   
@@ -291,7 +297,7 @@ export default function DicomReport({
   const handlePreview = () => {
       
     window.open(
-      `radiology/report/${studyUid}/preview`,
+      `/facility/${facilityId}/patient/${patientId}/service_requests/${serviceRequestId}/radiology/report/${studyUid}/preview`,
       "_blank",
     );
   };

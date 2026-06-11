@@ -43,6 +43,15 @@ export const RadiologyEncounterTab: FC<EncounterTabProps> = ({
     setSearchInput(e.target.value);
   };
 
+  const handleDicomUploadNavigation = () => {
+    const facilityId = encounter.facility.id;
+
+    // Need logic to find out service request id
+    const serviceRequestId = ":serviceRequestId";
+    
+    navigate(`/facility/${facilityId}/patient/${patient.id}/service_requests/${serviceRequestId}/radiology/uploader`)
+  }
+
   console.log("DATA ", dicomStudies, isLoading, error);
   return (
     <div className="py-4">
@@ -58,7 +67,7 @@ export const RadiologyEncounterTab: FC<EncounterTabProps> = ({
         </div>
         <Button
           variant="primary"
-          onClick={() => navigate(`radiology/uploader`)}
+          onClick={handleDicomUploadNavigation}
         >
           <Plus className="size-4 mr-1" />
           {t("dicom_upload_data")}
