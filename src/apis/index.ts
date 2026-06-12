@@ -89,7 +89,7 @@ export const apis = {
   },
 
   servicerequest: {
-    fetchStudies: async (query: { serviceRequestId: string }) => {
+    fetch: async (query: { serviceRequestId: string }) => {
       return await request<any>(
         `/api/care_radiology/dicom/service-requests${queryString({
           serviceRequestId: query?.serviceRequestId ?? "",

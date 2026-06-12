@@ -1,24 +1,33 @@
-import { FC } from "react";
+import React, { FC, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { DicomStudy } from "@/types/Dicom";
 import { apis } from "@/apis";
-import React from "react";
 import RadiologyStudyTable from "./RadiologyStudyTable";
 import { Card, CardContent } from "./ui/card";
 import { Label } from "@radix-ui/react-label";
+import { RadiologyServiceRequest } from "@/types/ServiceRequest";
 
 type SRProps = {
   serviceRequestId: string;
 };
+
 export const ServiceRequestView: FC<SRProps> = ({ serviceRequestId }) => {
-  const { data: dicomStudies } = useQuery<DicomStudy[]>({
-    queryKey: ["dicomimagelist", serviceRequestId],
+  const { data: radiologyServiceRequests } = useQuery<
+    RadiologyServiceRequest[]
+  >({
+    queryKey: ["radiologyservicerequest", serviceRequestId],
     queryFn: () =>
-      apis.servicerequest.fetchStudies({
+      apis.servicerequest.fetch({
         serviceRequestId,
       }),
-    enabled: true,
+    enabled: !!serviceRequestId,
   });
+
+  const dicomStudies = useMemo(
+    () =>
+      radiologyServiceRequests?.map((rsr) => rsr.dicom_study).filter(Boolean),
+    [radiologyServiceRequests],
+  );
+
   return (
     <React.Fragment>
       {dicomStudies && dicomStudies.length > 0 && (
@@ -30,7 +39,7 @@ export const ServiceRequestView: FC<SRProps> = ({ serviceRequestId }) => {
                   Radiology Studies
                 </Label>
               </div>
-              <RadiologyStudyTable studies={dicomStudies}></RadiologyStudyTable>
+              <RadiologyStudyTable studies={dicomStudies} />
             </div>
           </CardContent>
         </Card>
