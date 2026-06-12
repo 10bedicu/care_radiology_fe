@@ -28,10 +28,13 @@ interface DicomFile {
 }
 
 export default function DicomUploader({
+  facilityId,
   patientId,
+  serviceRequestId
 }: {
+  facilityId: string;
   patientId: string;
-  encounterId: string;
+  serviceRequestId: string;
 }) {
   const [files, setFiles] = useState<DicomFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -51,7 +54,7 @@ export default function DicomUploader({
           (f) => f?.study_uid && f?.study_uid != ""
         )?.study_uid;
         if (!studyUid) return;
-        const link = `/radiology/view/${studyUid}`;
+        const link = `/facility/${facilityId}/patient/${patientId}/service_requests/${serviceRequestId}/radiology/view/${studyUid}`;
         if (link) {
           setSuccessfulLink(link);
           toast.success(

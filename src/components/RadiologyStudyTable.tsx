@@ -1,5 +1,5 @@
 import { DicomStudy } from "@/types/Dicom";
-import { FC, useState } from "react";
+import { FC, useMemo, useState } from "react";
 import {
   Table,
   TableBody,
@@ -30,6 +30,35 @@ export const RadiologyStudyTable: FC<RadiologyStudyTableProps> = (props) => {
       console.error("Error fetching series info:", error);
     }
   };
+
+  const {facilityId, patientId, serviceRequestId} = useMemo(() => {
+    const path = window.location.pathname;
+    const facilityMatch = path.match(/\/facility\/([^/]+)/);
+    const patientMatch = path.match(/\/patient\/([^/]+)/);
+    const serviceRequestMatch = path.match(/\/service_requests?\/([^/]+)/);
+
+    return {
+      facilityId: facilityMatch?.[1] ?? ":facilityId",
+      patientId: patientMatch?.[1] ?? ":patientId",
+      serviceRequestId: serviceRequestMatch?.[1] ?? ":serviceRequestId",
+    };
+  }, []);
+
+  const handlePreview = (studyId: string) => {
+    window.open(
+      `/facility/${facilityId}/patient/${patientId}/service_requests/${serviceRequestId}/radiology/report/${studyId}/preview`,
+      "_blank"
+    );
+  }
+
+  const handleViewStudy = (studyUid: string) => {
+    navigate(`/facility/${facilityId}/patient/${patientId}/service_requests/${serviceRequestId}/radiology/view/${studyUid}`);
+  }
+
+  const handleEditReport = (studyId: string) => {
+    navigate(`/facility/${facilityId}/patient/${patientId}/service_requests/${serviceRequestId}/radiology/report/${studyId}`);
+  }
+
   return (
     <React.Fragment>
       <div className={`${props.className ?? ''} rounded-md border`}>
@@ -59,12 +88,7 @@ export const RadiologyStudyTable: FC<RadiologyStudyTableProps> = (props) => {
                   <div className="flex gap-3 items-center justify-end">
                     {study.has_report && 
                       <button
-                            onClick={() =>
-                              window.open(
-                                `/radiology/report/${study.external_id}/preview`,
-                                "_blank"
-                              )
-                            }
+                            onClick={() => handlePreview(study.external_id)}
                             className="text-gray-600 hover:text-orange-600"
                             title="View Report"
                       >
@@ -72,9 +96,7 @@ export const RadiologyStudyTable: FC<RadiologyStudyTableProps> = (props) => {
                       </button>
                     }             
                     <button
-                      onClick={() =>
-                        navigate(`/radiology/view/${study.study_uid}`)
-                      }
+                      onClick={() => handleViewStudy(study.study_uid)}
                       className="text-gray-600 hover:text-blue-600"
                       title="View Study"
                     >
@@ -88,8 +110,7 @@ export const RadiologyStudyTable: FC<RadiologyStudyTableProps> = (props) => {
                       <Info size={18} />
                     </button>
                     <button
-                          onClick={() =>
-                            navigate(`/radiology/report/${study.external_id}`)
+                          onClick={() => handleEditReport(study.external_id)
                           }
                           className="text-gray-600 hover:text-purple-600"
                           title="Edit Report"
