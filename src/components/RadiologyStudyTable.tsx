@@ -9,14 +9,19 @@ import {
   TableRow,
 } from "./ui/table";
 import { navigate } from "raviger";
-import { Eye, FileText, Info, X, Pencil } from "lucide-react";
+import { Eye, FileText, Info, X, Pencil, Plus, FilePlusIcon } from "lucide-react";
 import { format } from "date-fns";
 import React from "react";
+import { apis } from "@/apis";
 
 type RadiologyStudyTableProps = { className?: string, studies: DicomStudy[] };
 export const RadiologyStudyTable: FC<RadiologyStudyTableProps> = (props) => {
   const [showModal, setShowModal] = useState(false);
   const [selectedStudy, setSelectedStudy] = useState<DicomStudy | null>(null);
+  const [showReportSelectModal, setShowReportSelectModal] = useState(false);
+  const [reportSelectStudyId, setReportSelectStudyId] = useState<string>("");
+  const [reportSelectList, setReportSelectList] = useState<any[]>([]);
+  const [reportSelectMode, setReportSelectMode] = useState<"edit" | "preview">("edit");
   const handleInfoClick = async (study: DicomStudy) => {
     try {
       setSelectedStudy(study);
@@ -31,33 +36,69 @@ export const RadiologyStudyTable: FC<RadiologyStudyTableProps> = (props) => {
     }
   };
 
-  const {facilityId, patientId, serviceRequestId} = useMemo(() => {
+  const {facilityId, serviceRequestId} = useMemo(() => {
     const path = window.location.pathname;
     const facilityMatch = path.match(/\/facility\/([^/]+)/);
-    const patientMatch = path.match(/\/patient\/([^/]+)/);
     const serviceRequestMatch = path.match(/\/service_requests?\/([^/]+)/);
 
     return {
       facilityId: facilityMatch?.[1] ?? ":facilityId",
-      patientId: patientMatch?.[1] ?? ":patientId",
       serviceRequestId: serviceRequestMatch?.[1] ?? ":serviceRequestId",
     };
   }, []);
 
-  const handlePreview = (studyId: string) => {
-    window.open(
-      `/facility/${facilityId}/patient/${patientId}/service_requests/${serviceRequestId}/radiology/report/${studyId}/preview`,
-      "_blank"
-    );
+  const handlePreview = async (studyId: string) => {
+    const res = await apis.studyReport.fetchByStudy(studyId);
+    const reports: any[] = res?.results ?? [];
+
+    if (reports.length <= 1) {
+      const query = reports.length === 1 ? `?reportId=${reports[0].external_id}` : "";
+      window.open(
+        `/facility/${facilityId}/service_requests/${serviceRequestId}/radiology/report/${studyId}/preview${query}`,
+        "_blank"
+      );
+      return;
+    }
+
+    setReportSelectStudyId(studyId);
+    setReportSelectList(reports);
+    setReportSelectMode("preview");
+    setShowReportSelectModal(true);
   }
 
   const handleViewStudy = (studyUid: string) => {
-    navigate(`/facility/${facilityId}/patient/${patientId}/service_requests/${serviceRequestId}/radiology/view/${studyUid}`);
+    navigate(`/facility/${facilityId}/service_requests/${serviceRequestId}/radiology/view/${studyUid}`);
   }
 
-  const handleEditReport = (studyId: string) => {
-    navigate(`/facility/${facilityId}/patient/${patientId}/service_requests/${serviceRequestId}/radiology/report/${studyId}`);
-  }
+  const handleEditReport = async (studyId: string) => {
+    const res = await apis.studyReport.fetchByStudy(studyId);
+    const reports: any[] = res?.results ?? [];
+
+    if (reports.length <= 1) {
+      const query = reports.length === 1 ? `?reportId=${reports[0].external_id}` : "";
+      navigate(`/facility/${facilityId}/service_requests/${serviceRequestId}/radiology/report/${studyId}${query}`);
+      return;
+    }
+
+    setReportSelectStudyId(studyId);
+    setReportSelectList(reports);
+    setReportSelectMode("edit");
+    setShowReportSelectModal(true);
+  };
+
+  const handleReportSelect = (reportId: string) => {
+    setShowReportSelectModal(false);
+    if (reportSelectMode === "preview") {
+      window.open(
+        `/facility/${facilityId}/service_requests/${serviceRequestId}/radiology/report/${reportSelectStudyId}/preview?reportId=${reportId}`,
+        "_blank"
+      );
+    } else {
+      navigate(
+        `/facility/${facilityId}/service_requests/${serviceRequestId}/radiology/report/${reportSelectStudyId}?reportId=${reportId}`
+      );
+    }
+  };
 
   return (
     <React.Fragment>
@@ -110,13 +151,21 @@ export const RadiologyStudyTable: FC<RadiologyStudyTableProps> = (props) => {
                       <Info size={18} />
                     </button>
                     <button
-                          onClick={() => handleEditReport(study.external_id)
-                          }
-                          className="text-gray-600 hover:text-purple-600"
-                          title="Edit Report"
+                      onClick={() => navigate(`/facility/${facilityId}/service_requests/${serviceRequestId}/radiology/report/${study.external_id}`)}
+                      className="text-gray-600 hover:text-green-600"
+                      title="New Report"
                     >
-                          <Pencil size={18} />
+                      <FilePlusIcon size={18} />
                     </button>
+                    {study.has_report &&
+                      <button
+                            onClick={() => handleEditReport(study.external_id)}
+                            className="text-gray-600 hover:text-purple-600"
+                            title="Edit Report"
+                      >
+                            <Pencil size={18} />
+                      </button>
+                    }
                   </div>
                 </TableCell>
               </TableRow>
@@ -124,6 +173,88 @@ export const RadiologyStudyTable: FC<RadiologyStudyTableProps> = (props) => {
           </TableBody>
         </Table>
       </div>
+
+      {showReportSelectModal && (
+        <div className="fixed inset-0 bg-white/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg w-[760px] relative p-5 flex flex-col max-h-[80vh]">
+            <button
+              className="absolute top-3 right-3 text-gray-600 hover:text-red-600"
+              onClick={() => setShowReportSelectModal(false)}
+            >
+              <X size={20} />
+            </button>
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-1">
+                Multiple Reports Found
+              </h3>
+              <p className="text-sm text-gray-500">
+                Select a report to edit, or create a new one.
+              </p>
+            </div>
+            <div className="rounded-md border overflow-auto flex-1">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-gray-100">
+                    <TableHead className="px-4">#</TableHead>
+                    <TableHead className="px-4">Modality</TableHead>
+                    <TableHead className="px-4">Body Part</TableHead>
+                    <TableHead className="px-4">Scan Protocol</TableHead>
+                    <TableHead className="px-4">Created</TableHead>
+                    <TableHead className="px-4">Last Modified</TableHead>
+                    <TableHead className="px-4 text-right">Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {reportSelectList.map((report, index) => (
+                    <TableRow key={report.external_id}>
+                      <TableCell className="px-4 text-gray-500 text-sm">{index + 1}</TableCell>
+                      <TableCell className="px-4">{report.modality || "—"}</TableCell>
+                      <TableCell className="px-4">{report.body_part || "—"}</TableCell>
+                      <TableCell className="px-4">{report.scan_protocol || "—"}</TableCell>
+                      <TableCell className="px-4">
+                        {report.created_datetime
+                          ? format(new Date(report.created_datetime), "dd MMM yyyy, hh:mm aa")
+                          : "—"}
+                      </TableCell>
+                      <TableCell className="px-4">
+                        {report.last_modified_datetime
+                          ? format(new Date(report.last_modified_datetime), "dd MMM yyyy, hh:mm aa")
+                          : "—"}
+                      </TableCell>
+                      <TableCell className="px-4 text-right">
+                        <button
+                          onClick={() => handleReportSelect(report.external_id)}
+                          className="text-gray-600 hover:text-purple-600"
+                          title={reportSelectMode === "preview" ? "View report" : "Edit report"}
+                        >
+                          {reportSelectMode === "preview" ? <FileText size={18} /> : <Pencil size={18} />}
+                        </button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            {
+              reportSelectMode === "edit" &&
+              (
+                <div className="flex justify-end pt-4 border-t mt-4">
+                  <button
+                    onClick={() => {
+                      setShowReportSelectModal(false);
+                      navigate(`/facility/${facilityId}/service_requests/${serviceRequestId}/radiology/report/${reportSelectStudyId}`);
+                    }}
+                    className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-md bg-primary text-white hover:bg-primary/90 transition-colors"
+                  >
+                    <Plus size={15} />
+                    New Report
+                  </button>
+                </div>
+              )
+            }
+          </div>
+        </div>
+      )}
 
       {showModal && selectedStudy && (
         <div className="fixed inset-0 bg-white/40 backdrop-blur-sm flex items-center justify-center z-50">

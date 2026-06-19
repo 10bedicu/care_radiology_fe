@@ -20,30 +20,27 @@ const routes = {
         serviceRequestId={serviceRequestId}
       ></DicomUploader>
     ),
-  "/facility/:facilityId/patient/:patientId/service_requests/:serviceRequestId/radiology/view/:studyid":
+  "/facility/:facilityId/service_requests/:serviceRequestId/radiology/view/:studyid":
     ({ studyid }: { studyid: string }) => (
       <DicomViewer studyUid={studyid}></DicomViewer>
     ),
-  "/facility/:facilityId/patient/:patientId/service_requests/:serviceRequestId/radiology/report/:studyid":
+  "/facility/:facilityId/service_requests/:serviceRequestId/radiology/report/:studyid":
     ({ 
-      facilityId, 
-      patientId, 
+      facilityId,
       serviceRequestId, 
       studyid 
     }: { 
       facilityId: string;
-      patientId: string;
       serviceRequestId: string;
       studyid: string;
     }) => (
       <DicomReport 
         facilityId={facilityId} 
-        patientId={patientId}
         serviceRequestId={serviceRequestId}
         studyUid={studyid}
       ></DicomReport>
     ),
-  "/facility/:facilityId/patient/:patientId/service_requests/:serviceRequestId/radiology/report/:studyid/preview":
+  "/facility/:facilityId/service_requests/:serviceRequestId/radiology/report/:studyid/preview":
     ({ studyid }: { studyid: string }) => (
       <StudyReportPreview studyUid={studyid}></StudyReportPreview>
     ),

@@ -17,12 +17,10 @@ import { RadiologyServiceRequest } from "@/types/ServiceRequest";
 
 export default function DicomReport({
   facilityId,
-  patientId,
   serviceRequestId,
   studyUid,
 }: {
   facilityId: string;
-  patientId: string;
   serviceRequestId: string;
   studyUid: string;
 }) {
@@ -109,9 +107,19 @@ export default function DicomReport({
     const init = async () => {
       try {
         // STUDY REPORT FIRST
+        const reportId = new URLSearchParams(window.location.search).get("reportId");
+
+        if (!reportId) {
+          setInitialLoaded(true);
+          return;
+        }
+
         const reportRes = await apis.studyReport.fetchByStudy(studyUid);
-        if (reportRes && reportRes?.results?.length > 0) {
-          const r = reportRes.results[0];
+        const allReports: any[] = reportRes?.results ?? [];
+        const targetReport = allReports.find((r) => r.external_id === reportId);
+
+        if (targetReport) {
+          const r = targetReport;
           setStudyReportId(r.external_id);
           setSelectedModality(r.modality_id);
           setSelectedBodyPart(r.body_part_id);
@@ -309,17 +317,28 @@ export default function DicomReport({
     const findingsContent = findingsRef.current?.root.innerHTML;
     const impressionContent = impressionRef.current?.root.innerHTML;
     try {
-      const res = (await apis.studyReport.create({
-        study: studyUid,
-        modality: selectedModality,
-        body_part: selectedBodyPart,
-        scan_protocol: selectedScanProtocol,
-        technique: techniqueContent,
-        findings: findingsContent,
-        impression: impressionContent,
-      })) as { external_id: string };
-      if (res?.external_id) {
-        setStudyReportId(res.external_id);
+      if (studyReportId) {
+        await apis.studyReport.update(studyReportId, {
+          modality: selectedModality,
+          body_part: selectedBodyPart,
+          scan_protocol: selectedScanProtocol,
+          technique: techniqueContent,
+          findings: findingsContent,
+          impression: impressionContent,
+        });
+      } else {
+        const res = (await apis.studyReport.create({
+          study: studyUid,
+          modality: selectedModality,
+          body_part: selectedBodyPart,
+          scan_protocol: selectedScanProtocol,
+          technique: techniqueContent,
+          findings: findingsContent,
+          impression: impressionContent,
+        })) as { external_id: string };
+        if (res?.external_id) {
+          setStudyReportId(res.external_id);
+        }
       }
       toast.success(t("radiology_report_saved_successfully!"));
       setReportExists(true);
@@ -333,8 +352,9 @@ export default function DicomReport({
   };
 
   const handlePreview = () => {
+    const query = studyReportId ? `?reportId=${studyReportId}` : "";
     window.open(
-      `/facility/${facilityId}/patient/${patientId}/service_requests/${serviceRequestId}/radiology/report/${studyUid}/preview`,
+      `/facility/${facilityId}/service_requests/${serviceRequestId}/radiology/report/${studyUid}/preview${query}`,
       "_blank",
     );
   };
