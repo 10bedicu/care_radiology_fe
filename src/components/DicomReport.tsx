@@ -5,8 +5,16 @@ import { Card } from "./ui/card";
 import { Input } from "./ui/input";
 import Quill from "quill";
 import Editor from "./ui/quilleditor";
-import { Plus, Pencil, Info } from "lucide-react"; // icons
+import { Plus, Pencil, Info } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 import EditAddModal from "./EditAddModal";
+import BodyPartSearch from "./BodyPartSearch";
 import { toast, Toaster } from "sonner";
 import { useTranslation } from "react-i18next";
 import RadiologyAuditPopup from "./Common/RadiologyAuditPopup";
@@ -49,6 +57,7 @@ export default function DicomReport({
   const [requester, setRequester] = useState<any>(null);
   const [departments, setDepartments] = useState<any>([]);
   const [dicomStudy, setDicomStudy] = useState<any>(null);
+  const [bodyPartMissing, setBodyPartMissing] = useState(false);
 
   const { t: basetranslate } = useTranslation();
   const { t } = useTranslation("care_radiology_fe");
@@ -85,7 +94,7 @@ export default function DicomReport({
         setDicomStudy(relevantServiceRequest.dicom_study);
         setSelectedModality(sr.code!.display);
         if (!sr.body_site?.display) {
-          toast.error(t("radiology_service_request_missing_config"), { id: "missing-body-site" });
+          setBodyPartMissing(true);
         } else {
           setSelectedBodyPart(sr.body_site.display);
         }
@@ -164,6 +173,7 @@ export default function DicomReport({
     if (!selectedModality || !selectedBodyPart) return;
     const fetchScanProtocols = async () => {
       try {
+        setSelectedScanProtocol("");
         setLoadingScanProtocols(true);
         const data = await apis.scanProtocol.fetchAll({
           modality: selectedModality,
@@ -306,6 +316,8 @@ export default function DicomReport({
     setModalOpen(true);
   };
 
+  const canManageProtocol = !!(selectedBodyPart && !loadingScanProtocols);
+
   const patientAgeGender = patient
     ? `${formatPatientAge(patient, true)}, ${basetranslate(`GENDER__${patient.gender}`)}`
     : "-";
@@ -350,22 +362,25 @@ export default function DicomReport({
       <Card className="w-full border shadow-sm bg-white mx-6 mb-6">
         <div className="flex flex-row gap-0 w-full h-[80vh] overflow-hidden">
           {/* Left Sidebar */}
-          <div className="w-[360px] min-w-[360px] max-w-[360px] border-r p-6 bg-white flex flex-col gap-4 overflow-y-auto shrink-0 overflow-x-hidden">
+          <div className="border-r p-6 bg-white flex flex-col gap-4 overflow-y-auto shrink-0 overflow-x-hidden" style={{width: "360px", maxWidth: "360px", minWidth: "360px"}}>
             {/* Modality Section */}
             <div className="w-full min-w-0">
               <h4 className="font-medium text-sm text-gray-700 mb-2 truncate">
                 {t("radiology_modality_type")}{" "}
                 <span className="text-red-500">*</span>
               </h4>
-              <select
-                value={selectedModality}
-                disabled
-                className="w-full max-w-full border border-gray-300 rounded-md text-sm p-2.5 bg-gray-100 text-gray-700 cursor-not-allowed"
-              >
-                {selectedModality && (
-                  <option value={selectedModality}>{selectedModality}</option>
-                )}
-              </select>
+              <Select value={selectedModality} disabled>
+                <SelectTrigger className="w-full disabled:opacity-100 bg-gray-100">
+                  <SelectValue placeholder="-" />
+                </SelectTrigger>
+                <SelectContent>
+                  {selectedModality && (
+                    <SelectItem value={selectedModality}>
+                      {selectedModality}
+                    </SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Body Part Section */}
@@ -374,15 +389,28 @@ export default function DicomReport({
                 {t("radiology_body_part")}{" "}
                 <span className="text-red-500">*</span>
               </h4>
-              <select
-                value={selectedBodyPart}
-                disabled
-                className="w-full max-w-full border border-gray-300 rounded-md text-sm p-2.5 bg-gray-100 text-gray-700 cursor-not-allowed"
-              >
-                {selectedBodyPart && (
-                  <option value={selectedBodyPart}>{selectedBodyPart}</option>
-                )}
-              </select>
+              {bodyPartMissing ? (
+                <div className="w-full">
+                  <BodyPartSearch
+                    value={selectedBodyPart}
+                    onChange={setSelectedBodyPart}
+                    placeholder={t("radiology_select") + " Body Part"}
+                  />
+                </div>
+              ) : (
+                <Select value={selectedBodyPart} disabled>
+                  <SelectTrigger className="w-full disabled:opacity-100 bg-gray-100">
+                    <SelectValue placeholder="-" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {selectedBodyPart && (
+                      <SelectItem value={selectedBodyPart}>
+                        {selectedBodyPart}
+                      </SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
 
             {/* Scan Protocol Section */}
@@ -394,36 +422,38 @@ export default function DicomReport({
                 <div className="flex gap-1 shrink-0">
                   <Plus
                     size={16}
-                    className="cursor-pointer hover:text-green-600"
-                    onClick={handleAdd}
+                    className={canManageProtocol ? "cursor-pointer hover:text-green-600" : "text-gray-300 cursor-not-allowed pointer-events-none"}
+                    onClick={canManageProtocol ? handleAdd : undefined}
                   />
                   <Pencil
                     size={16}
-                    className="cursor-pointer hover:text-green-600"
-                    onClick={handleEdit}
+                    className={canManageProtocol ? "cursor-pointer hover:text-green-600" : "text-gray-300 cursor-not-allowed pointer-events-none"}
+                    onClick={canManageProtocol ? handleEdit : undefined}
                   />
                 </div>
               </div>
-              {loadingScanProtocols ? (
-                <div className="text-sm text-gray-500">
-                  {t("radiology_loading")}
-                </div>
-              ) : (
-                <select
-                  value={selectedScanProtocol}
-                  onChange={(e) => setSelectedScanProtocol(e.target.value)}
-                  className="w-full max-w-full border border-gray-300 rounded-md text-sm p-2.5 bg-white focus:border-green-500 focus:ring-1 focus:ring-green-500"
-                >
-                  <option value="">
-                    {t("radiology_select")} Scan Protocol
-                  </option>
+              <Select
+                value={selectedScanProtocol}
+                onValueChange={setSelectedScanProtocol}
+                disabled={!canManageProtocol}
+              >
+                <SelectTrigger className={`w-full ${!canManageProtocol ? "disabled:opacity-100 bg-gray-200" : ""}`}>
+                  <SelectValue
+                    placeholder={
+                      loadingScanProtocols
+                        ? t("radiology_loading")
+                        : t("radiology_select") + " Scan Protocol"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
                   {scanProtocols.map((sp) => (
-                    <option key={sp.external_id} value={sp.external_id}>
+                    <SelectItem key={sp.external_id} value={sp.external_id}>
                       {sp.display_name}
-                    </option>
+                    </SelectItem>
                   ))}
-                </select>
-              )}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
