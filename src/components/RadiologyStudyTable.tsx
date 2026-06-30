@@ -1,5 +1,6 @@
 import { DicomStudy } from "@/types/Dicom";
 import { FC, useMemo, useState } from "react";
+import DicomViewer from "./DicomViewer";
 import {
   Table,
   TableBody,
@@ -13,11 +14,17 @@ import { Eye, FileText, Info, X, Pencil, Plus, FilePlusIcon } from "lucide-react
 import { format } from "date-fns";
 import React from "react";
 import { apis } from "@/apis";
+import { PLUGIN_SLUG } from "@/constants";
+import { useTranslation } from "react-i18next";
+import { Button } from "./ui/button";
 
 type RadiologyStudyTableProps = { className?: string, studies: DicomStudy[] };
 export const RadiologyStudyTable: FC<RadiologyStudyTableProps> = (props) => {
+  const { t } = useTranslation(PLUGIN_SLUG);
+
   const [showModal, setShowModal] = useState(false);
   const [selectedStudy, setSelectedStudy] = useState<DicomStudy | null>(null);
+  const [viewerStudyUid, setViewerStudyUid] = useState<string | null>(null);
   const [showReportSelectModal, setShowReportSelectModal] = useState(false);
   const [reportSelectStudyId, setReportSelectStudyId] = useState<string>("");
   const [reportSelectList, setReportSelectList] = useState<any[]>([]);
@@ -67,7 +74,7 @@ export const RadiologyStudyTable: FC<RadiologyStudyTableProps> = (props) => {
   }
 
   const handleViewStudy = (studyUid: string) => {
-    navigate(`/facility/${facilityId}/service_requests/${serviceRequestId}/radiology/view/${studyUid}`);
+    setViewerStudyUid(studyUid);
   }
 
   const handleEditReport = async (studyId: string) => {
@@ -136,13 +143,13 @@ export const RadiologyStudyTable: FC<RadiologyStudyTableProps> = (props) => {
                             <FileText size={18} />
                       </button>
                     }             
-                    <button
+                    <Button
+                      variant="outline"
                       onClick={() => handleViewStudy(study.study_uid)}
-                      className="text-gray-600 hover:text-blue-600"
-                      title="View Study"
                     >
                       <Eye size={18} />
-                    </button>
+                      {t("dicom_view_study")}
+                    </Button>
                     <button
                       onClick={() => handleInfoClick(study)}
                       className="text-gray-600 hover:text-green-600"
@@ -252,6 +259,18 @@ export const RadiologyStudyTable: FC<RadiologyStudyTableProps> = (props) => {
                 </div>
               )
             }
+          </div>
+        </div>
+      )}
+
+      {viewerStudyUid && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-7xl max-h-[95vh] overflow-auto">
+            <DicomViewer
+              studyUid={viewerStudyUid}
+              embedded
+              onClose={() => setViewerStudyUid(null)}
+            />
           </div>
         </div>
       )}
