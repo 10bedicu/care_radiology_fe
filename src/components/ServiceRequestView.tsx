@@ -1,32 +1,26 @@
-import React, { FC, useMemo } from "react";
+import React, { FC } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apis } from "@/apis";
 import RadiologyStudyTable from "./RadiologyStudyTable";
 import { Card, CardContent } from "./ui/card";
 import { Label } from "@radix-ui/react-label";
-import { RadiologyServiceRequest } from "@/types/ServiceRequest";
+import { DicomStudy } from "@/types/Dicom";
 
 type SRProps = {
   serviceRequestId: string;
 };
 
 export const ServiceRequestView: FC<SRProps> = ({ serviceRequestId }) => {
-  const { data: radiologyServiceRequests } = useQuery<
-    RadiologyServiceRequest[]
-  >({
-    queryKey: ["radiologyservicerequest", serviceRequestId],
-    queryFn: () =>
-      apis.servicerequest.fetch({
+  const { data: dicomStudies } = useQuery<DicomStudy[]>({
+    queryKey: ["dicomimagelist", serviceRequestId],
+    queryFn: async () => {
+      const raw = await apis.servicerequest.fetch({
         serviceRequestId,
-      }),
+      });
+      return raw.map((item: any) => item.dicom_study);
+    },
     enabled: !!serviceRequestId,
   });
-
-  const dicomStudies = useMemo(
-    () =>
-      radiologyServiceRequests?.map((rsr) => rsr.dicom_study).filter(Boolean),
-    [radiologyServiceRequests],
-  );
 
   return (
     <React.Fragment>
