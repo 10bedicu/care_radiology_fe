@@ -13,10 +13,12 @@ type SRProps = {
 export const ServiceRequestView: FC<SRProps> = ({ serviceRequestId }) => {
   const { data: dicomStudies } = useQuery<DicomStudy[]>({
     queryKey: ["dicomimagelist", serviceRequestId],
-    queryFn: () =>
-      apis.servicerequest.fetchStudies({
+    queryFn: async () => {
+      const raw = await apis.servicerequest.fetchStudies({
         serviceRequestId,
-      }),
+      });
+      return raw.map((item: any) => item.dicom_study);
+    },
     enabled: true,
   });
   return (

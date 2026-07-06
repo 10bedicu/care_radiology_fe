@@ -2,7 +2,6 @@ import { RefObject, useEffect, useRef, useState } from "react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { useTranslation } from "react-i18next";
-import { useQueryClient } from "@tanstack/react-query";
 import { PLUGIN_SLUG } from "@/constants";
 import { PlugConfigMeta } from "@/types/plugin";
 
@@ -19,27 +18,20 @@ export default function DicomViewer({
   const [iframeUrl, setIframeUrl] = useState<string | null>(null);
   const { t } = useTranslation(PLUGIN_SLUG);
 
-  const queryClient = useQueryClient();
   useEffect(() => {
-    queryClient
-      .ensureQueryData({ queryKey: ["user-refresh-token"] })
-      .then((val) => {
-        const token = (val as { access: string; refresh: string }).access;
-
-        const meta = window.__CARE_PLUGIN_RUNTIME__?.meta[PLUGIN_SLUG] as PlugConfigMeta;
-        const ohifBaseUrl = `${ meta?.config?.radiologyViewerBaseUrl || "" }`;
-        if (studyUid && seriesUid && instanceUid) {
-          setIframeUrl(
-            `${ohifBaseUrl}/viewer?StudyInstanceUIDs=${studyUid}&initialSeriesInstanceUID=${seriesUid}&initialSopInstanceUID=${instanceUid}&token=${token}`
-          );
-        } else {
-          setIframeUrl(
-            `${ohifBaseUrl}/viewer?StudyInstanceUIDs=${studyUid}&token=${token}`
-          );
-        }
-      });
-  }, [queryClient]);
-
+    const token = localStorage.getItem("care_access_token") || "";
+    const meta = window.__CARE_PLUGIN_RUNTIME__?.meta[PLUGIN_SLUG] as PlugConfigMeta;
+    const ohifBaseUrl = `${meta?.radiologyViewerBaseUrl || ""}`;
+    if (studyUid && seriesUid && instanceUid) {
+      setIframeUrl(
+        `${ohifBaseUrl}/viewer?StudyInstanceUIDs=${studyUid}&initialSeriesInstanceUID=${seriesUid}&initialSopInstanceUID=${instanceUid}&token=${token}`
+      );
+    } else {
+      setIframeUrl(
+        `${ohifBaseUrl}/viewer?StudyInstanceUIDs=${studyUid}&token=${token}`
+      );
+    }
+  }, [studyUid, seriesUid, instanceUid]);
   const goFullscreen = (ref: RefObject<HTMLIFrameElement>) => {
     if (ref.current) ref.current.requestFullscreen();
   };
